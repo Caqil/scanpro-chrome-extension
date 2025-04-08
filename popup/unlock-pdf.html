@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unlock PDF - ScanPro Tools</title>
+  <link rel="stylesheet" href="popup.css">
+  <style>
+    body {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .drag-area {
+      border: 2px dashed var(--border-color);
+      border-radius: var(--border-radius);
+      padding: 30px;
+      text-align: center;
+      margin-bottom: 20px;
+      transition: all 0.2s;
+    }
+    
+    .drag-area.active {
+      border-color: var(--primary-color);
+      background-color: var(--primary-light);
+    }
+    
+    .drag-area .icon {
+      font-size: 50px;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+    }
+    
+    .file-preview {
+      margin-top: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .file-preview.hidden {
+      display: none;
+    }
+    
+    .file-icon {
+      color: var(--primary-color);
+      flex-shrink: 0;
+    }
+    
+    .file-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .file-name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 400px;
+    }
+    
+    .file-size {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    
+    .file-actions {
+      display: flex;
+      gap: 5px;
+    }
+    
+    .password-section {
+      margin: 20px 0;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+    }
+    
+    .password-section-header {
+      background-color: var(--bg-muted);
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .password-section-content {
+      padding: 15px;
+    }
+    
+    .password-field {
+      position: relative;
+      margin-bottom: 10px;
+    }
+    
+    .password-field input {
+      padding-right: 40px;
+    }
+    
+    .password-field .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+    
+    .password-info {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+    
+    .security-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background-color: var(--error-color);
+      color: white;
+      margin-left: 10px;
+    }
+    
+    .security-badge svg {
+      width: 12px;
+      height: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <div class="logo">
+        <img src="../images/logo.png" alt="ScanPro Logo">
+        <h1>ScanPro Tools - Unlock PDF</h1>
+      </div>
+      <div class="settings-btn">
+        <button id="closeBtn" title="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+    
+    <main>
+      <section>
+        <h2>Unlock PDF Document</h2>
+        <p class="description">Remove password protection from your PDF document.</p>
+        
+        <div class="drag-area" id="dropArea">
+          <div class="icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </div>
+          <h3>Drag & Drop Password Protected PDF Here</h3>
+          <p>or</p>
+          <input type="file" id="fileInput" accept=".pdf" class="hidden-file-input">
+          <button class="secondary-btn" id="browseBtn">
+            Browse Files
+          </button>
+        </div>
+        
+        <div id="filePreview" class="file-preview hidden">
+          <div class="file-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <div class="file-info">
+            <span id="fileName" class="file-name">filename.pdf</span>
+            <div class="file-details">
+              <span id="fileSize" class="file-size">0 KB</span>
+              <span id="securityStatus" class="security-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                Password Protected
+              </span>
+            </div>
+          </div>
+          <div class="file-actions">
+            <button id="clearFileBtn" class="icon-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="password-section" id="passwordSection">
+          <div class="password-section-header">
+            <h3>Enter Password</h3>
+          </div>
+          <div class="password-section-content">
+            <div class="password-field">
+              <label for="pdfPassword">PDF Password</label>
+              <div class="password-field">
+                <input type="password" id="pdfPassword" placeholder="Enter the PDF password">
+                <button type="button" class="toggle-password" id="togglePasswordVisibility">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div class="password-info">
+              <p>Enter the password that was used to protect this PDF. This could be either the owner password or the user password.</p>
+              <p>The unlocked PDF will no longer require a password to open and will have all restrictions removed.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="actions">
+          <button id="unlockBtn" class="primary-btn" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+            </svg>
+            Unlock PDF
+          </button>
+        </div>
+        
+        <div id="unlockProgress" class="progress-container hidden">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 0%"></div>
+          </div>
+          <span class="progress-text">0%</span>
+        </div>
+        
+        <div id="unlockResult" class="result-container hidden">
+          <div class="result-header">
+            <h3>Unlock Complete</h3>
+            <button id="unlockResultCloseBtn" class="icon-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="result-content">
+            <div class="unlock-stats">
+              <div class="stat">
+                <span class="stat-label">File:</span>
+                <span id="resultFileNameText">filename.pdf</span>
+              </div>
+              <div class="stat">
+                <span class="stat-label">Status:</span>
+                <span id="unlockStatusText">Successfully Unlocked</span>
+              </div>
+            </div>
+            <button id="unlockDownloadBtn" class="secondary-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Download Unlocked PDF
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  
+  <script src="unlock-pdf.js" type="module"></script>
+</body>
+</html>

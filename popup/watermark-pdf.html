@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watermark PDF - ScanPro Tools</title>
+  <link rel="stylesheet" href="popup.css">
+  <style>
+    body {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .drag-area {
+      border: 2px dashed var(--border-color);
+      border-radius: var(--border-radius);
+      padding: 30px;
+      text-align: center;
+      margin-bottom: 20px;
+      transition: all 0.2s;
+    }
+    
+    .drag-area.active {
+      border-color: var(--primary-color);
+      background-color: var(--primary-light);
+    }
+    
+    .drag-area .icon {
+      font-size: 50px;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+    }
+    
+    .file-preview {
+      margin-top: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .file-preview.hidden {
+      display: none;
+    }
+    
+    .file-icon {
+      color: var(--primary-color);
+      flex-shrink: 0;
+    }
+    
+    .file-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .file-name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 400px;
+    }
+    
+    .file-size {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    
+    .file-actions {
+      display: flex;
+      gap: 5px;
+    }
+    
+    .watermark-options {
+      margin: 20px 0;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+    }
+    
+    .watermark-options-header {
+      background-color: var(--bg-muted);
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .watermark-options-content {
+      padding: 15px;
+    }
+    
+    .watermark-type {
+      margin-bottom: 15px;
+    }
+    
+    .watermark-type:last-child {
+      margin-bottom: 0;
+    }
+    
+    .watermark-type-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    
+    .watermark-type-radio {
+      margin: 0;
+    }
+    
+    .watermark-type-title {
+      font-weight: 500;
+    }
+    
+    .watermark-type-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: 25px;
+      margin-bottom: 10px;
+    }
+    
+    .watermark-settings {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .watermark-field {
+      margin-bottom: 15px;
+    }
+    
+    .watermark-field label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .watermark-field input,
+    .watermark-field select {
+      width: 100%;
+    }
+    
+    .color-field {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .color-field input[type="color"] {
+      width: 40px;
+      height: 30px;
+      padding: 0;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      cursor: pointer;
+    }
+    
+    .opacity-field {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .opacity-slider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .opacity-slider input[type="range"] {
+      flex: 1;
+    }
+    
+    .opacity-value {
+      width: 40px;
+      text-align: right;
+      font-weight: 500;
+    }
+    
+    .position-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .position-option {
+      position: relative;
+      aspect-ratio: 1;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    
+    .position-option:hover {
+      border-color: var(--primary-color);
+      background-color: var(--primary-light);
+    }
+    
+    .position-option.active {
+      border-color: var(--primary-color);
+      background-color: var(--primary-light);
+    }
+    
+    .position-option input {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+    
+    .position-icon {
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    
+    .active .position-icon {
+      color: var(--primary-color);
+    }
+    
+    .image-upload {
+      border: 2px dashed var(--border-color);
+      border-radius: var(--border-radius);
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .image-upload:hover {
+      border-color: var(--primary-color);
+      background-color: var(--primary-light);
+    }
+    
+    .image-upload-icon {
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+    
+    .image-preview {
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .image-preview.hidden {
+      display: none;
+    }
+    
+    .image-preview-thumbnail {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      background-color: white;
+    }
+    
+    .image-preview-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .image-preview-name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 400px;
+    }
+    
+    .image-preview-size {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <div class="logo">
+        <img src="../images/logo.png" alt="ScanPro Logo">
+        <h1>ScanPro Tools - Watermark PDF</h1>
+      </div>
+      <div class="settings-btn">
+        <button id="closeBtn" title="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+    
+    <main>
+      <section>
+        <h2>Add Watermark to PDF</h2>
+        <p class="description">Add text or image watermarks to your PDF document.</p>
+        
+        <div class="drag-area" id="dropArea">
+          <div class="icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </div>
+          <h3>Drag & Drop PDF File Here</h3>
+          <p>or</p>
+          <input type="file" id="fileInput" accept=".pdf" class="hidden-file-input">
+          <button class="secondary-btn" id="browseBtn">
+            Browse Files
+          </button>
+        </div>
+        
+        <div id="filePreview" class="file-preview hidden">
+          <div class="file-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <div class="file-info">
+            <span id="fileName" class="file-name">filename.pdf</span>
+            <div class="file-details">
+              <span id="fileSize" class="file-size">0 KB</span>
+              <span id="pageCount" class="file-size">0 pages</span>
+            </div>
+          </div>
+          <div class="file-actions">
+            <button id="clearFileBtn" class="icon-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="watermark-options">
+          <div class="watermark-options-header">
+            <h3>Watermark Options</h3>
+          </div>
+          <div class="watermark-options-content">
+            <div class="watermark-type">
+              <label class="watermark-type-label">
+                <input type="radio" name="watermarkType" value="text" class="watermark-type-radio" checked>
+                <span class="watermark-type-title">Text Watermark</span>
+              </label>
+              <div class="watermark-type-desc">
+                Add text watermark to your document.
+              </div>
+              <div id="textWatermarkOptions">
+                <div class="watermark-field">
+                  <label for="watermarkText">Watermark Text</label>
+                  <input type="text" id="watermarkText" placeholder="Enter watermark text (e.g., CONFIDENTIAL, DRAFT)">
+                </div>
+                
+                <div class="watermark-field">
+                  <label for="fontSelect">Font</label>
+                  <select id="fontSelect">
+                    <option value="helvetica">Helvetica</option>
+                    <option value="times">Times Roman</option>
+                    <option value="courier">Courier</option>
+                    <option value="arial">Arial</option>
+                    <option value="verdana">Verdana</option>
+                  </select>
+                </div>
+                
+                <div class="watermark-field">
+                  <label for="fontSizeSelect">Font Size</label>
+                  <select id="fontSizeSelect">
+                    <option value="24">Small</option>
+                    <option value="36" selected>Medium</option>
+                    <option value="48">Large</option>
+                    <option value="64">Extra Large</option>
+                  </select>
+                </div>
+                
+                <div class="watermark-field">
+                  <label for="textColorPicker">Text Color</label>
+                  <div class="color-field">
+                    <input type="color" id="textColorPicker" value="#999999">
+                    <input type="text" id="textColorValue" value="#999999" readonly>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="watermark-type">
+              <label class="watermark-type-label">
+                <input type="radio" name="watermarkType" value="image" class="watermark-type-radio">
+                <span class="watermark-type-title">Image Watermark</span>
+              </label>
+              <div class="watermark-type-desc">
+                Add image watermark to your document.
+              </div>
+              <div id="imageWatermarkOptions">
+                <input type="file" id="imageInput" accept="image/*" class="hidden-file-input">
+                <div class="image-upload" id="imageUploadArea">
+                  <div class="image-upload-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                      <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                      <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                  </div>
+                  <div>
+                    <p>Click to select image for watermark</p>
+                    <p class="description">PNG or JPG, transparent background recommended</p>
+                  </div>
+                </div>
+                <div id="imagePreview" class="image-preview hidden">
+                  <img id="imagePreviewThumbnail" class="image-preview-thumbnail" src="" alt="Watermark image">
+                  <div class="image-preview-info">
+                    <span id="imageFileName" class="image-preview-name">image.png</span>
+                    <span id="imageFileSize" class="image-preview-size">0 KB</span>
+                  </div>
+                  <button id="clearImageBtn" class="icon-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                </div>
+                
+                <div class="watermark-field">
+                  <label for="imageSizeSelect">Image Size</label>
+                  <select id="imageSizeSelect">
+                    <option value="small">Small</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="large">Large</option>
+                    <option value="original">Original Size</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div class="watermark-settings">
+              <h4>Watermark Settings</h4>
+              
+              <div class="watermark-field">
+                <label for="opacitySlider">Opacity</label>
+                <div class="opacity-slider">
+                  <input type="range" id="opacitySlider" min="10" max="100" value="30">
+                  <span id="opacityValue" class="opacity-value">30%</span>
+                </div>
+              </div>
+              
+              <div class="watermark-field">
+                <label for="rotationSelect">Rotation</label>
+                <select id="rotationSelect">
+                  <option value="0">No Rotation</option>
+                  <option value="45" selected>45 Degrees</option>
+                  <option value="-45">-45 Degrees</option>
+                  <option value="90">90 Degrees</option>
+                  <option value="-90">-90 Degrees</option>
+                </select>
+              </div>
+              
+              <div class="watermark-field">
+                <label>Position</label>
+                <div class="position-grid">
+                  <div class="position-option" data-position="top-left">
+                    <input type="radio" name="position" value="top-left">
+                    <div class="position-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 3h6v6H3z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="position-option" data-position="top-center">
+                    <input type="radio" name="position" value="top-center">
+                    <div class="position-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 3h6v6H9z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="position-option" data-position="top-right">
+                    <input type="radio" name="position" value="top-right">
+                    <div class="position-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 3h6v6h-6z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="position-option" data-position="center-left">
+                    <input type="radio" name="position" value="center-left">
+                    <div class="position-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9h6v6H3z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="position-option active" data-position="center">
+                    <input type="radio" name="position" value="center" checked>
+                    <div class="position-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 9h6v6H9z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="position-option" data-position="center-right">
+                    <input type="radio" name="position" value="center-right">
+                    <div class="position-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 9h6v6h-6z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="position-option" data-position="bottom-left">
+                    <input type="radio" name="position" value="bottom-left">
+                    <div class="position-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 15h6v6H3z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="position-option" data-position="bottom-center">
+                    <input type="radio" name="position" value="bottom-center">
+                    <div class="position-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 15h6v6H9z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="position-option" data-position="bottom-right">
+                    <input type="radio" name="position" value="bottom-right">
+                    <div class="position-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 15h6v6h-6z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="watermark-field">
+                <label for="pagesSelect">Apply To</label>
+                <select id="pagesSelect">
+                  <option value="all" selected>All Pages</option>
+                  <option value="first">First Page Only</option>
+                  <option value="last">Last Page Only</option>
+                  <option value="custom">Custom Pages</option>
+                </select>
+              </div>
+              
+              <div id="customPagesSection" class="watermark-field hidden">
+                <label for="customPagesInput">Custom Pages</label>
+                <input type="text" id="customPagesInput" placeholder="E.g.: 1, 3-5, 7-9">
+                <div class="page-info">
+                  Format: 1, 3-5, 7-9 (comma separated page numbers or ranges)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="actions">
+          <button id="watermarkBtn" class="primary-btn" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            Add Watermark
+          </button>
+        </div>
+        
+        <div id="watermarkProgress" class="progress-container hidden">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 0%"></div>
+          </div>
+          <span class="progress-text">0%</span>
+        </div>
+        
+        <div id="watermarkResult" class="result-container hidden">
+          <div class="result-header">
+            <h3>Watermark Complete</h3>
+            <button id="watermarkResultCloseBtn" class="icon-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="result-content">
+            <div class="watermark-stats">
+              <div class="stat">
+                <span class="stat-label">File:</span>
+                <span id="resultFileNameText">filename.pdf</span>
+              </div>
+              <div class="stat">
+                <span class="stat-label">Pages:</span>
+                <span id="pagesWatermarkedText">All pages</span>
+              </div>
+            </div>
+            <button id="watermarkDownloadBtn" class="secondary-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Download Watermarked PDF
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  
+  <script src="watermark-pdf.js" type="module"></script>
+</body>
+</html>

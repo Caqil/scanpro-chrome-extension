@@ -334,45 +334,47 @@ toolCards.forEach(card => {
     handleToolClick(tool);
   });
 });
-
 function handleToolClick(tool) {
   // Open specific tool functionality
   switch (tool) {
     case 'merge':
-      openToolPage('merge-pdf');
+      openToolWindow('merge-pdf.html');
       break;
     case 'split':
-      openToolPage('split-pdf');
+      openToolWindow('split-pdf.html');
       break;
     case 'rotate':
-      openToolPage('rotate-pdf');
+      openToolWindow('rotate-pdf.html');
       break;
     case 'watermark':
-      openToolPage('watermark-pdf');
+      openToolWindow('watermark-pdf.html');
       break;
     case 'protect':
-      openToolPage('protect-pdf');
+      openToolWindow('protect-pdf.html');
       break;
     case 'unlock':
-      openToolPage('unlock-pdf');
+      openToolWindow('unlock-pdf.html');
       break;
     case 'sign':
-      openToolPage('sign-pdf');
+      openToolWindow('sign-pdf.html');
       break;
     case 'ocr':
-      openToolPage('ocr-pdf');
+      openToolWindow('ocr-pdf.html');
       break;
     default:
       console.warn('Unknown tool:', tool);
   }
 }
 
-function openToolPage(toolPath) {
-  chrome.tabs.create({
-    url: `https://scanpro.cc/${toolPath}`
+function openToolWindow(toolPath) {
+  // Create a more focused window for tools
+  chrome.windows.create({
+    url: chrome.runtime.getURL(`popup/${toolPath}`),
+    type: 'popup',
+    width: 800,
+    height: 700
   });
 }
-
 // Helper functions
 function clearConvertSection() {
   convertFileInput.value = '';
