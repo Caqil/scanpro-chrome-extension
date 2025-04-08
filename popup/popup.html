@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScanPro Tools</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <div class="logo">
+        <img src="../images/logo.png" alt="ScanPro Logo">
+        <h1>ScanPro Tools</h1>
+      </div>
+      <div class="settings-btn">
+        <button id="settingsBtn" title="Settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+    
+    <!-- API Key setup section (shown if no API key) -->
+    <section id="apiKeySection" class="hidden">
+      <div class="section-content">
+        <h2>Connect to ScanPro API</h2>
+        <p>Enter your API key to enable ScanPro tools.</p>
+        <div class="form-group">
+          <label for="apiKeyInput">API Key</label>
+          <input type="password" id="apiKeyInput" placeholder="Enter your ScanPro API key">
+        </div>
+        <div class="actions">
+          <button id="saveApiKeyBtn" class="primary-btn">Save API Key</button>
+        </div>
+        <div class="info-text">
+          <p>Don't have an API key? <a href="https://scanpro.cc/api-keys" target="_blank">Get one here</a></p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Tabs navigation -->
+    <nav class="tabs-nav">
+      <button class="tab-btn active" data-tab="convert">Convert</button>
+      <button class="tab-btn" data-tab="compress">Compress</button>
+      <button class="tab-btn" data-tab="edit">Edit</button>
+      <button class="tab-btn" data-tab="protect">Protect</button>
+    </nav>
+    
+    <!-- Tab content sections -->
+    <main class="tab-content">
+      <!-- Convert Tab -->
+      <section id="convertTab" class="tab-panel active">
+        <div class="section-content">
+          <h2>Convert PDF</h2>
+          <div class="file-input-container">
+            <label for="convertFileInput" class="file-input-label">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Select PDF File</span>
+            </label>
+            <input type="file" id="convertFileInput" accept=".pdf" class="hidden-file-input">
+          </div>
+          <div id="convertFilePreview" class="file-preview hidden">
+            <div class="file-info">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              <div class="file-details">
+                <span id="convertFileName">filename.pdf</span>
+                <span id="convertFileSize">0 KB</span>
+              </div>
+              <button id="convertClearBtn" class="icon-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="convertFormatSelect">Convert To</label>
+            <select id="convertFormatSelect">
+              <option value="docx">Word (DOCX)</option>
+              <option value="xlsx">Excel (XLSX)</option>
+              <option value="pptx">PowerPoint (PPTX)</option>
+              <option value="jpg">Image (JPG)</option>
+              <option value="png">Image (PNG)</option>
+              <option value="html">HTML</option>
+              <option value="txt">Text</option>
+            </select>
+          </div>
+          <div class="actions">
+            <button id="convertBtn" class="primary-btn" disabled>Convert PDF</button>
+          </div>
+          <div id="convertProgress" class="progress-container hidden">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 0%"></div>
+            </div>
+            <span class="progress-text">0%</span>
+          </div>
+          <div id="convertResult" class="result-container hidden">
+            <div class="result-header">
+              <h3>Conversion Complete</h3>
+              <button id="convertResultCloseBtn" class="icon-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            <div class="result-content">
+                              <button id="convertDownloadBtn" class="secondary-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  Download File
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Compress Tab -->
+      <section id="compressTab" class="tab-panel">
+        <div class="section-content">
+          <h2>Compress PDF</h2>
+          <div class="file-input-container">
+            <label for="compressFileInput" class="file-input-label">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Select PDF File</span>
+            </label>
+            <input type="file" id="compressFileInput" accept=".pdf" class="hidden-file-input">
+          </div>
+          <div id="compressFilePreview" class="file-preview hidden">
+            <div class="file-info">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              <div class="file-details">
+                <span id="compressFileName">filename.pdf</span>
+                <span id="compressFileSize">0 KB</span>
+              </div>
+              <button id="compressClearBtn" class="icon-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="compressionLevelSelect">Compression Level</label>
+            <select id="compressionLevelSelect">
+              <option value="low">Low (Better Quality)</option>
+              <option value="medium" selected>Medium (Balanced)</option>
+              <option value="high">High (Smaller Size)</option>
+            </select>
+          </div>
+          <div class="actions">
+            <button id="compressBtn" class="primary-btn" disabled>Compress PDF</button>
+          </div>
+          <div id="compressProgress" class="progress-container hidden">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 0%"></div>
+            </div>
+            <span class="progress-text">0%</span>
+          </div>
+          <div id="compressResult" class="result-container hidden">
+            <div class="result-header">
+              <h3>Compression Complete</h3>
+              <button id="compressResultCloseBtn" class="icon-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            <div class="result-content">
+              <div class="compression-stats">
+                <div class="stat">
+                  <span class="stat-label">Original Size:</span>
+                  <span id="originalSizeText">0 KB</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Compressed Size:</span>
+                  <span id="compressedSizeText">0 KB</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Reduction:</span>
+                  <span id="reductionText">0%</span>
+                </div>
+              </div>
+              <button id="compressDownloadBtn" class="secondary-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download File
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Edit Tab -->
+      <section id="editTab" class="tab-panel">
+        <div class="section-content">
+          <h2>Edit PDF</h2>
+          <div class="tool-grid">
+            <div class="tool-card" data-tool="merge">
+              <div class="tool-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 8v8l-3-3H4l7-7v3h3l2-2v3z"></path>
+                  <path d="M8 16v-8l3 3h9l-7 7v-3h-3l-2 2v-3z"></path>
+                </svg>
+              </div>
+              <div class="tool-name">Merge PDFs</div>
+              <div class="tool-desc">Combine multiple PDFs into one document</div>
+            </div>
+            <div class="tool-card" data-tool="split">
+              <div class="tool-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="3" y1="9" x2="21" y2="9"></line>
+                  <line x1="3" y1="15" x2="21" y2="15"></line>
+                  <line x1="12" y1="3" x2="12" y2="21"></line>
+                </svg>
+              </div>
+              <div class="tool-name">Split PDF</div>
+              <div class="tool-desc">Separate a PDF into multiple files</div>
+            </div>
+            <div class="tool-card" data-tool="rotate">
+              <div class="tool-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 12c0-3.314-2.686-6-6-6s-6 2.686-6 6 2.686 6 6 6 6-2.686 6-6z"></path>
+                  <path d="M15.47 9.5L21 9.5"></path>
+                  <polyline points="18 6.5 21 9.5 18 12.5"></polyline>
+                </svg>
+              </div>
+              <div class="tool-name">Rotate PDF</div>
+              <div class="tool-desc">Change page orientation</div>
+            </div>
+            <div class="tool-card" data-tool="watermark">
+              <div class="tool-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+              </div>
+              <div class="tool-name">Add Watermark</div>
+              <div class="tool-desc">Apply text or image watermarks</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Protect Tab -->
+      <section id="protectTab" class="tab-panel">
+        <div class="section-content">
+          <h2>Protect & Secure</h2>
+          <div class="tool-grid">
+            <div class="tool-card" data-tool="protect">
+              <div class="tool-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </div>
+              <div class="tool-name">Password Protect</div>
+              <div class="tool-desc">Set password & permissions</div>
+            </div>
+            <div class="tool-card" data-tool="unlock">
+              <div class="tool-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+                </svg>
+              </div>
+              <div class="tool-name">Unlock PDF</div>
+              <div class="tool-desc">Remove password protection</div>
+            </div>
+            <div class="tool-card" data-tool="sign">
+              <div class="tool-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 19v-8.5a1 1 0 0 0-.4-.8l-7-5.25a1 1 0 0 0-1.2 0l-7 5.25a1 1 0 0 0-.4.8V19a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1z"></path>
+                  <path d="M8 11h8"></path>
+                  <path d="M8 15h4"></path>
+                </svg>
+              </div>
+              <div class="tool-name">Sign PDF</div>
+              <div class="tool-desc">Add signatures to documents</div>
+            </div>
+            <div class="tool-card" data-tool="ocr">
+              <div class="tool-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 14H4v-4h10v4z"></path>
+                  <path d="M17 7l3 3-3 3"></path>
+                  <path d="M18 17v3h-3"></path>
+                </svg>
+              </div>
+              <div class="tool-name">OCR PDF</div>
+              <div class="tool-desc">Make scanned PDFs searchable</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Settings</h2>
+          <button id="closeSettingsBtn" class="icon-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="apiKeySettingInput">API Key</label>
+            <div class="api-key-field">
+              <input type="password" id="apiKeySettingInput" placeholder="Enter your ScanPro API key">
+              <button id="toggleApiKeyVisibility" class="icon-btn" title="Toggle visibility">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="saveLocationInput">Default Save Location</label>
+            <select id="saveLocationInput">
+              <option value="downloads">Downloads Folder</option>
+              <option value="ask">Ask Each Time</option>
+            </select>
+          </div>
+          <div class="settings-section">
+            <h3>About</h3>
+            <p>ScanPro Chrome Extension v1.0.0</p>
+            <div class="links">
+              <a href="https://scanpro.cc" target="_blank">Website</a>
+              <a href="https://scanpro.cc/docs" target="_blank">Documentation</a>
+              <a href="https://scanpro.cc/contact" target="_blank">Support</a>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="saveSettingsBtn" class="primary-btn">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script src="popup.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Merge PDFs - ScanPro Tools</title>
+  <link rel="stylesheet" href="popup.css">
+  <style>
+    body {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .drag-area {
+      border: 2px dashed var(--border-color);
+      border-radius: var(--border-radius);
+      padding: 30px;
+      text-align: center;
+      margin-bottom: 20px;
+      transition: all 0.2s;
+    }
+    
+    .drag-area.active {
+      border-color: var(--primary-color);
+      background-color: var(--primary-light);
+    }
+    
+    .drag-area .icon {
+      font-size: 50px;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+    }
+    
+    .file-list {
+      margin-top: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .file-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 15px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .file-item:last-child {
+      border-bottom: none;
+    }
+    
+    .file-handle {
+      cursor: move;
+      margin-right: 15px;
+      color: var(--text-muted);
+    }
+    
+    .file-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .file-name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 400px;
+    }
+    
+    .file-size {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    
+    .file-actions {
+      display: flex;
+      gap: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <div class="logo">
+        <img src="../images/logo.png" alt="ScanPro Logo">
+        <h1>ScanPro Tools - Merge PDFs</h1>
+      </div>
+    </header>
+    
+    <main>
+      <section>
+        <h2>Merge PDF Files</h2>
+        <p class="description">Combine multiple PDF files into a single document. Drag and drop to reorder.</p>
+        
+        <div class="drag-area" id="dropArea">
+          <div class="icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </div>
+          <h3>Drag & Drop PDF Files Here</h3>
+          <p>or</p>
+          <input type="file" id="fileInput" accept=".pdf" multiple class="hidden-file-input">
+          <button class="secondary-btn" id="browseBtn">
+            Browse Files
+          </button>
+        </div>
+        
+        <div class="file-list" id="fileList"></div>
+        
+        <div class="actions">
+          <button id="clearBtn" class="secondary-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Clear All
+          </button>
+          <button id="mergeBtn" class="primary-btn" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 8v8l-3-3H4l7-7v3h3l2-2v3z"></path>
+              <path d="M8 16v-8l3 3h9l-7 7v-3h-3l-2 2v-3z"></path>
+            </svg>
+            Merge PDFs
+          </button>
+        </div>
+        
+        <div id="mergeProgress" class="progress-container hidden">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 0%"></div>
+          </div>
+          <span class="progress-text">0%</span>
+        </div>
+        
+        <div id="mergeResult" class="result-container hidden">
+          <div class="result-header">
+            <h3>Merge Complete</h3>
+            <button id="mergeResultCloseBtn" class="icon-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="result-content">
+            <div class="merge-stats">
+              <div class="stat">
+                <span class="stat-label">Files Merged:</span>
+                <span id="fileCountText">0</span>
+              </div>
+              <div class="stat">
+                <span class="stat-label">Result Size:</span>
+                <span id="resultSizeText">0 KB</span>
+              </div>
+            </div>
+            <button id="mergeDownloadBtn" class="secondary-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Download Merged PDF
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  
+  <script src="merge-pdf.js" type="module"></script>
+</body>
+</html>
+      <div class="settings-btn">
+        <button id="closeBtn" title="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
