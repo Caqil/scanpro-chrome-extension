@@ -334,45 +334,40 @@ toolCards.forEach(card => {
     handleToolClick(tool);
   });
 });
+
 function handleToolClick(tool) {
-  // Open specific tool functionality
-  switch (tool) {
-    case 'merge':
-      openToolWindow('merge-pdf.html');
-      break;
-    case 'split':
-      openToolWindow('split-pdf.html');
-      break;
-    case 'rotate':
-      openToolWindow('rotate-pdf.html');
-      break;
-    case 'watermark':
-      openToolWindow('watermark-pdf.html');
-      break;
-    case 'protect':
-      openToolWindow('protect-pdf.html');
-      break;
-    case 'unlock':
-      openToolWindow('unlock-pdf.html');
-      break;
-    case 'sign':
-      openToolWindow('sign-pdf.html');
-      break;
-    case 'ocr':
-      openToolWindow('ocr-pdf.html');
-      break;
-    default:
-      console.warn('Unknown tool:', tool);
+  // Map tools to their corresponding website URLs
+  const toolUrls = {
+    'merge': 'https://scanpro.cc/en/merge-pdf',
+    'split': 'https://scanpro.cc/en/split-pdf',
+    'rotate': 'https://scanpro.cc/en/rotate-pdf',
+    'watermark': 'https://scanpro.cc/en/watermark-pdf',
+    'protect': 'https://scanpro.cc/en/protect-pdf',
+    'unlock': 'https://scanpro.cc/en/unlock-pdf',
+    'sign': 'https://scanpro.cc/en/sign-pdf',
+    'ocr': 'https://scanpro.cc/en//ocr-pdf'
+  };
+
+  // Get the URL for the selected tool
+  const url = toolUrls[tool];
+  
+  if (url) {
+    openToolWindowInTab(url);
+  } else {
+    console.warn('Unknown tool:', tool);
   }
 }
 
-function openToolWindow(toolPath) {
-  // Create a more focused window for tools
-  chrome.windows.create({
-    url: chrome.runtime.getURL(`popup/${toolPath}`),
-    type: 'popup',
-    width: 800,
-    height: 700
+
+// Alternative version using tabs instead of popup windows
+function openToolWindowInTab(url) {
+  chrome.tabs.create({
+    url: url,
+    active: true    // Brings the new tab into focus
+  }, (tab) => {
+    if (chrome.runtime.lastError) {
+      console.error('Error opening tab:', chrome.runtime.lastError);
+    }
   });
 }
 // Helper functions
