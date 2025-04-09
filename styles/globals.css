@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 248 90% 66%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 248 90% 66%;
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 248 90% 66%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 248 90% 66%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* ScanPro Enhancement */
+a.scanpro-enhanced {
+  @apply relative;
+}
+
+a.scanpro-enhanced:hover::after {
+  content: "📄";
+  @apply inline-block ml-1 text-base cursor-pointer;
+}
+
+.scanpro-link-tools {
+  @apply min-w-[180px];
+}
+
+.scanpro-tool-button {
+  @apply transition-colors duration-200;
+}
+
+.scanpro-tool-button:hover {
+  @apply bg-slate-50;
+}
+
+.scanpro-floating-button {
+  @apply fixed bottom-5 right-5 w-14 h-14 rounded-full bg-indigo-500 text-white flex items-center justify-center shadow-md cursor-pointer z-50 transition-transform duration-200;
+}
+
+.scanpro-floating-button:hover {
+  @apply transform scale-105 shadow-lg;
+}
+
+.scanpro-floating-button svg {
+  @apply w-6 h-6;
+}
+
+.scanpro-tooltip {
+  @apply absolute bg-slate-800 text-white py-1.5 px-2.5 rounded text-xs bottom-full left-1/2 transform -translate-x-1/2 mb-2 whitespace-nowrap opacity-0 invisible transition-opacity duration-200;
+}
+
+.scanpro-tooltip::after {
+  content: "";
+  @apply absolute top-full left-1/2 transform -translate-x-1/2 border-solid border-transparent border-t-slate-800 border-[5px];
+}
+
+*:hover > .scanpro-tooltip {
+  @apply opacity-100 visible;
+}

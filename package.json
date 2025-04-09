@@ -1,0 +1,13 @@
+{
+    "name": "scanpro-extension",
+    "version": "1.0.0",
+    "description": "PDF tools powered by ScanPro API - convert, compress, merge, split, protect, sign and more",
+    "scripts": {
+      "build": "tailwindcss -i ./styles/globals.css -o ./styles/tailwind.css",
+      "watch": "tailwindcss -i ./styles/globals.css -o ./styles/tailwind.css --watch"
+    },
+    "devDependencies": {
+      "tailwindcss": "^3.4.1",
+      "tailwindcss-animate": "^1.0.7"
+    }
+  }

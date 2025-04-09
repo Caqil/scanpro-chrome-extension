@@ -1,93 +1,55 @@
 /**
- * ScanPro Chrome Extension Content Styles
- * These styles are injected into web pages
+ * ScanPro Chrome Extension Content Styles with Tailwind CSS
  */
+
+/* Tailwind base classes are imported via globals.css */
 
 /* Highlight enhanced PDF links */
 a.scanpro-enhanced {
-    position: relative;
-  }
-  
-  a.scanpro-enhanced:hover::after {
-    content: "📄";
-    display: inline-block;
-    margin-left: 4px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  
-  /* ScanPro link tools */
-  .scanpro-link-tools {
-    min-width: 180px;
-  }
-  
-  .scanpro-tool-button {
-    transition: background-color 0.2s ease;
-  }
-  
-  .scanpro-tool-button:hover {
-    background-color: #f8fafc;
-  }
-  
-  /* ScanPro floating button */
-  .scanpro-floating-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background-color: #6366f1;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    z-index: 9999;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  
-  .scanpro-floating-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-  }
-  
-  .scanpro-floating-button svg {
-    width: 24px;
-    height: 24px;
-  }
-  
-  /* Tooltip */
-  .scanpro-tooltip {
-    position: absolute;
-    background-color: #1e293b;
-    color: white;
-    padding: 6px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-bottom: 8px;
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.2s ease, visibility 0.2s ease;
-  }
-  
-  .scanpro-tooltip::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border-width: 5px;
-    border-style: solid;
-    border-color: #1e293b transparent transparent transparent;
-  }
-  
-  *:hover > .scanpro-tooltip {
-    opacity: 1;
-    visibility: visible;
-  }
+  @apply relative;
+}
+
+a.scanpro-enhanced:hover::after {
+  content: "📄";
+  @apply inline-block ml-1 text-base cursor-pointer;
+}
+
+/* ScanPro link tools */
+.scanpro-link-tools {
+  @apply min-w-[180px] bg-white border border-slate-200 rounded-md shadow-md p-1.5 z-50 absolute;
+}
+
+.scanpro-tool-button {
+  @apply block w-full text-left py-2 px-3 border-none bg-transparent cursor-pointer text-sm transition-colors duration-200;
+}
+
+.scanpro-tool-button:hover {
+  @apply bg-slate-50;
+}
+
+/* ScanPro floating button */
+.scanpro-floating-button {
+  @apply fixed bottom-5 right-5 w-14 h-14 rounded-full bg-indigo-500 text-white flex items-center justify-center shadow-md cursor-pointer z-50 transition-transform duration-200;
+}
+
+.scanpro-floating-button:hover {
+  @apply transform scale-105 shadow-lg;
+}
+
+.scanpro-floating-button svg {
+  @apply w-6 h-6;
+}
+
+/* Tooltip */
+.scanpro-tooltip {
+  @apply absolute bg-slate-800 text-white py-1.5 px-2.5 rounded text-xs bottom-full left-1/2 transform -translate-x-1/2 mb-2 whitespace-nowrap opacity-0 invisible transition-opacity duration-200;
+}
+
+.scanpro-tooltip::after {
+  content: "";
+  @apply absolute top-full left-1/2 transform -translate-x-1/2 border-solid border-transparent border-t-slate-800 border-[5px];
+}
+
+*:hover > .scanpro-tooltip {
+  @apply opacity-100 visible;
+}

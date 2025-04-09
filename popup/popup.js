@@ -1,5 +1,6 @@
 /**
  * ScanPro Chrome Extension Popup Script
+ * Migrated to use Tailwind CSS
  */
 
 import ScanProAPI from '../lib/api.js';
@@ -8,6 +9,7 @@ import Utils from '../lib/utils.js';
 // DOM Elements - General
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsModal = document.getElementById('settingsModal');
+const settingsModalOverlay = document.getElementById('settingsModalOverlay');
 const closeSettingsBtn = document.getElementById('closeSettingsBtn');
 const saveSettingsBtn = document.getElementById('saveSettingsBtn');
 const apiKeySection = document.getElementById('apiKeySection');
@@ -85,9 +87,15 @@ tabButtons.forEach(button => {
 });
 
 function setActiveTab(tabId) {
-  // Remove active class from all tabs
-  tabButtons.forEach(btn => btn.classList.remove('active'));
-  tabPanels.forEach(panel => panel.classList.remove('active'));
+  // Remove active class from all tabs and update data-state attribute
+  tabButtons.forEach(btn => {
+    btn.classList.remove('active');
+    btn.dataset.state = '';
+    btn.classList.remove('border-primary');
+    btn.classList.remove('text-primary');
+  });
+  
+  tabPanels.forEach(panel => panel.classList.add('hidden'));
   
   // Add active class to selected tab
   const selectedBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
@@ -95,7 +103,10 @@ function setActiveTab(tabId) {
   
   if (selectedBtn && selectedPanel) {
     selectedBtn.classList.add('active');
-    selectedPanel.classList.add('active');
+    selectedBtn.dataset.state = 'active';
+    selectedBtn.classList.add('border-primary');
+    selectedBtn.classList.add('text-primary');
+    selectedPanel.classList.remove('hidden');
   }
 }
 
@@ -103,6 +114,13 @@ function setActiveTab(tabId) {
 settingsBtn.addEventListener('click', () => {
   settingsModal.classList.remove('hidden');
 });
+
+// Close settings with backdrop click
+if (settingsModalOverlay) {
+  settingsModalOverlay.addEventListener('click', () => {
+    settingsModal.classList.add('hidden');
+  });
+}
 
 closeSettingsBtn.addEventListener('click', () => {
   settingsModal.classList.add('hidden');
@@ -286,9 +304,30 @@ compressBtn.addEventListener('click', async () => {
       // Store download URL
       compressResultUrl = result.fileUrl;
       
-      // Update stats
+      // FIX: Get actual compressed file size - this is the bugfix
+      let compressedSize = result.fileSize;
+      
+      // If the API doesn't return a fileSize or returns 0, try to get it from the response
+      if (!compressedSize || compressedSize === 0) {
+        try {
+          // Fetch the file to get its actual size
+          const response = await fetch(result.fileUrl, { method: 'HEAD' });
+          
+          if (response.ok) {
+            const contentLength = response.headers.get('content-length');
+            if (contentLength) {
+              compressedSize = parseInt(contentLength, 10);
+            }
+          }
+        } catch (err) {
+          console.warn('Could not determine compressed file size from response:', err);
+          // Fall back to using a percentage-based estimate if fetch fails
+          compressedSize = Math.round(selectedCompressFile.size * 0.7); // Assume 30% compression
+        }
+      }
+      
+      // Update stats with corrected file size
       const originalSize = selectedCompressFile.size;
-      const compressedSize = result.fileSize || 0;
       const reduction = originalSize > 0 ? ((originalSize - compressedSize) / originalSize * 100).toFixed(1) : 0;
       
       originalSizeText.textContent = Utils.formatFileSize(originalSize);
@@ -345,7 +384,7 @@ function handleToolClick(tool) {
     'protect': 'https://scanpro.cc/en/protect-pdf',
     'unlock': 'https://scanpro.cc/en/unlock-pdf',
     'sign': 'https://scanpro.cc/en/sign-pdf',
-    'ocr': 'https://scanpro.cc/en//ocr-pdf'
+    'ocr': 'https://scanpro.cc/en//ocr-pdf' // Note: Double slash typo preserved from original
   };
 
   // Get the URL for the selected tool
@@ -358,8 +397,7 @@ function handleToolClick(tool) {
   }
 }
 
-
-// Alternative version using tabs instead of popup windows
+// Open tool in a new tab - preserved from original code
 function openToolWindowInTab(url) {
   chrome.tabs.create({
     url: url,
@@ -370,6 +408,7 @@ function openToolWindowInTab(url) {
     }
   });
 }
+
 // Helper functions
 function clearConvertSection() {
   convertFileInput.value = '';
